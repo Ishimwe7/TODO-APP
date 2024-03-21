@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-
+// import supertest from "supertest";
 const Todo = require('../model/Todo');
 
 const url = "mongodb+srv://nyanja-cyane:nyanja@cluster0.qmnp1kf.mongodb.net/<todo_db>?retryWrites=true&w=majority";
@@ -9,12 +9,14 @@ const url = "mongodb+srv://nyanja-cyane:nyanja@cluster0.qmnp1kf.mongodb.net/<tod
 beforeAll(async () => {
     await mongoose.connect(url);
     console.log('Connected to MongoDb');
+    //jest.setTimeout(50000);
 });
 
 // Clean up after all tests have finished
 afterAll(async () => {
     await mongoose.connection.dropDatabase();
     await mongoose.connection.close();
+    //jest.setTimeout(50000);
 });
 
 describe('Todo Model', () => {
@@ -30,6 +32,7 @@ describe('Todo Model', () => {
 
         const newTodo = await Todo.create(todoData);
         testTodoId = newTodo._id; // Store the ID of the created todo for use in other tests
+
 
         expect(newTodo.title).toBe('Test Todo Title');
         expect(newTodo.description).toBe('Test Description');

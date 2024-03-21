@@ -14,7 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const User = require('../model/User');
-//const bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt');
 const router = express_1.default.Router();
 // Add Todo item
 router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -25,7 +25,7 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const duplicate = yield User.findOne({ email: email }).exec();
         if (duplicate)
             return res.status(409).json({ "duplicateError": "Email already used!" });
-        //const hashedPassword = bcrypt.hash(password, 10);
+        const hashedPassword = bcrypt.hash(password, 10);
         const user = new User({
             names,
             email,

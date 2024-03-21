@@ -1,7 +1,7 @@
 
 import express, { Request, Response } from 'express';
 const User = require('../model/User');
-//const bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt');
 
 const router = express.Router();
 
@@ -12,7 +12,7 @@ router.post('/', async (req: Request, res: Response) => {
         if (!names || !email || !password) return res.status(400).json({ 'message': 'Both names, email and password are required!!' });
         const duplicate = await User.findOne({ email: email }).exec();
         if (duplicate) return res.status(409).json({ "duplicateError": "Email already used!" });
-        //const hashedPassword = bcrypt.hash(password, 10);
+        const hashedPassword = bcrypt.hash(password, 10);
         const user = new User({
             names,
             email,

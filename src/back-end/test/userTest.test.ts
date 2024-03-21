@@ -7,12 +7,14 @@ const url = "mongodb+srv://nyanja-cyane:nyanja@cluster0.qmnp1kf.mongodb.net/<tod
 
 // Set up MongoDB connection before running tests
 beforeAll(async () => {
+    //jest.setTimeout(10000);
     await mongoose.connect(url);
     console.log('Connected to MongoDb');
 });
 
 // Clean up after all tests have finished
 afterAll(async () => {
+
     await mongoose.connection.dropDatabase();
     await mongoose.connection.close();
 });
@@ -28,12 +30,12 @@ describe('User Model', () => {
             password: 'testpassword',
         };
 
-        const newUser = await User.create(userData);
-        testUserId = newUser._id; // Store the ID of the created todo for use in other tests
+        const newCreatedUser = await User.create(userData);
+        testUserId = newCreatedUser._id; // Store the ID of the created todo for use in other tests
 
-        expect(newUser.names).toBe('Test User name');
-        expect(newUser.email).toBe('test@gmail.com');
-        expect(newUser.password).toBe('testpassword');
+        expect(newCreatedUser.names).toBe('Test User name');
+        expect(newCreatedUser.email).toBe('test@gmail.com');
+        expect(newCreatedUser.password).toBe('testpassword');
     });
 
     // Test case for retrieving all todos

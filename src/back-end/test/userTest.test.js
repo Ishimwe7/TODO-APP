@@ -17,6 +17,7 @@ const User = require('../model/User');
 const url = "mongodb+srv://nyanja-cyane:nyanja@cluster0.qmnp1kf.mongodb.net/<todo_db>?retryWrites=true&w=majority";
 // Set up MongoDB connection before running tests
 beforeAll(() => __awaiter(void 0, void 0, void 0, function* () {
+    //jest.setTimeout(10000);
     yield mongoose_1.default.connect(url);
     console.log('Connected to MongoDb');
 }));
@@ -34,11 +35,11 @@ describe('User Model', () => {
             email: 'test@gmail.com',
             password: 'testpassword',
         };
-        const newUser = yield User.create(userData);
-        testUserId = newUser._id; // Store the ID of the created todo for use in other tests
-        expect(newUser.names).toBe('Test User name');
-        expect(newUser.email).toBe('test@gmail.com');
-        expect(newUser.password).toBe('testpassword');
+        const newCreatedUser = yield User.create(userData);
+        testUserId = newCreatedUser._id; // Store the ID of the created todo for use in other tests
+        expect(newCreatedUser.names).toBe('Test User name');
+        expect(newCreatedUser.email).toBe('test@gmail.com');
+        expect(newCreatedUser.password).toBe('testpassword');
     }));
     // Test case for retrieving all todos
     it('should retrieve all users', () => __awaiter(void 0, void 0, void 0, function* () {
