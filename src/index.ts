@@ -2,7 +2,6 @@ const express = require('express');
 const mongoose = require('mongoose');
 const controller = require('./back-end/controllers/todoController');
 const userController = require('./back-end/controllers/userController');
-
 const app = express();
 const url = "mongodb+srv://nyanja-cyane:nyanja@cluster0.qmnp1kf.mongodb.net/<todo_db>?retryWrites=true&w=majority";
 

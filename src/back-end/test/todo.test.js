@@ -13,17 +13,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
+// import supertest from "supertest";
 const Todo = require('../model/Todo');
 const url = "mongodb+srv://nyanja-cyane:nyanja@cluster0.qmnp1kf.mongodb.net/<todo_db>?retryWrites=true&w=majority";
 // Set up MongoDB connection before running tests
 beforeAll(() => __awaiter(void 0, void 0, void 0, function* () {
     yield mongoose_1.default.connect(url);
     console.log('Connected to MongoDb');
+    //jest.setTimeout(50000);
 }));
 // Clean up after all tests have finished
 afterAll(() => __awaiter(void 0, void 0, void 0, function* () {
     yield mongoose_1.default.connection.dropDatabase();
     yield mongoose_1.default.connection.close();
+    //jest.setTimeout(50000);
 }));
 describe('Todo Model', () => {
     let testTodoId; // To store the ID of the test todo for use in other tests
