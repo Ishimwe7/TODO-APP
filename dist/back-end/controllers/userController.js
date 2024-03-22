@@ -16,12 +16,25 @@ const express_1 = __importDefault(require("express"));
 const User = require('../model/User');
 const bcrypt = require('bcrypt');
 const router = express_1.default.Router();
-// Add Todo item
+const isValidEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+};
+const isStrongPassword = (password) => {
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return passwordRegex.test(password);
+};
 router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { names, email, password } = req.body;
         if (!names || !email || !password)
             return res.status(400).json({ 'message': 'Both names, email and password are required!!' });
+        if (!isValidEmail(email)) {
+            return res.status(500).json({ Invalid: 'Sorry!! You provided an invalid email.' });
+        }
+        if (!isStrongPassword(password)) {
+            return res.status(500).json({ Invalid: 'Sorry!! Your password is weak.' });
+        }
         const duplicate = yield User.findOne({ email: email }).exec();
         if (duplicate)
             return res.status(409).json({ "duplicateError": "Email already used!" });
@@ -39,11 +52,16 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.status(500).json({ message: 'Server Error' });
     }
 }));
-// Update Todo item
 router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
         const { names, email, password } = req.body;
+        if (!isValidEmail(email)) {
+            return res.status(500).json({ Invalid: 'Sorry!! You provided an invalid email.' });
+        }
+        if (!isStrongPassword(password)) {
+            return res.status(500).json({ Invalid: 'Sorry!! Your password is weak.' });
+        }
         const user = yield User.findByIdAndUpdate(id, { names, email, password }, { new: true });
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
@@ -55,12 +73,19 @@ router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         res.status(500).json({ message: 'Server Error' });
     }
 }));
-// Delete Todo item
-router.delete('/:id/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.delete('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
-        const user = yield User.findByIdAndDelete(id);
+        const { email, password } = req.body;
+        if (!password) {
+            return res.status(400).json({ message: 'Password is required' });
+        }
+        const user = yield User.findOne({ email, password });
         if (!user) {
+            return res.status(404).json({ message: `User not found ! Can't delete User` });
+        }
+        const deletedUser = yield User.findByIdAndDelete(id);
+        if (!deletedUser) {
             return res.status(404).json({ message: 'User not found' });
         }
         res.json({ message: 'User deleted successfully' });
@@ -70,7 +95,6 @@ router.delete('/:id/', (req, res) => __awaiter(void 0, void 0, void 0, function*
         res.status(500).json({ message: 'Server Error' });
     }
 }));
-// Get all Todo items
 router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const users = yield User.find();
@@ -81,5 +105,18 @@ router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.status(500).json({ message: 'Server Error' });
     }
 }));
-//export default router;
+router.post('/login', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { email, password } = req.body;
+        const user = yield User.findOne({ email, password });
+        if (!user) {
+            return res.status(404).json({ message: 'Login Failed. Invalid Credentials !' });
+        }
+        res.json({ user });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+}));
 module.exports = router;

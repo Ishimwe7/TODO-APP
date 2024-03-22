@@ -5,11 +5,26 @@ const bcrypt = require('bcrypt');
 
 const router = express.Router();
 
-// Add Todo item
+const isValidEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+};
+
+const isStrongPassword = (password: string): boolean => {
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return passwordRegex.test(password);
+};
+
 router.post('/', async (req: Request, res: Response) => {
     try {
         const { names, email, password } = req.body;
         if (!names || !email || !password) return res.status(400).json({ 'message': 'Both names, email and password are required!!' });
+        if (!isValidEmail(email)) {
+            return res.status(500).json({ Invalid: 'Sorry!! You provided an invalid email.' })
+        }
+        if (!isStrongPassword(password)) {
+            return res.status(500).json({ Invalid: 'Sorry!! Your password is weak.' })
+        }
         const duplicate = await User.findOne({ email: email }).exec();
         if (duplicate) return res.status(409).json({ "duplicateError": "Email already used!" });
         const hashedPassword = bcrypt.hash(password, 10);
@@ -26,11 +41,16 @@ router.post('/', async (req: Request, res: Response) => {
     }
 });
 
-// Update Todo item
 router.put('/:id', async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         const { names, email, password } = req.body;
+        if (!isValidEmail(email)) {
+            return res.status(500).json({ Invalid: 'Sorry!! You provided an invalid email.' })
+        }
+        if (!isStrongPassword(password)) {
+            return res.status(500).json({ Invalid: 'Sorry!! Your password is weak.' })
+        }
         const user = await User.findByIdAndUpdate(id, { names, email, password }, { new: true });
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
@@ -42,12 +62,19 @@ router.put('/:id', async (req: Request, res: Response) => {
     }
 });
 
-// Delete Todo item
-router.delete('/:id/', async (req: Request, res: Response) => {
+router.delete('/:id', async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const user = await User.findByIdAndDelete(id);
+        const { email, password } = req.body;
+        if (!password) {
+            return res.status(400).json({ message: 'Password is required' });
+        }
+        const user = await User.findOne({ email, password });
         if (!user) {
+            return res.status(404).json({ message: `User not found ! Can't delete User` });
+        }
+        const deletedUser = await User.findByIdAndDelete(id);
+        if (!deletedUser) {
             return res.status(404).json({ message: 'User not found' });
         }
         res.json({ message: 'User deleted successfully' });
@@ -57,7 +84,6 @@ router.delete('/:id/', async (req: Request, res: Response) => {
     }
 });
 
-// Get all Todo items
 router.get('/', async (req: Request, res: Response) => {
     try {
         const users = await User.find();
@@ -68,5 +94,20 @@ router.get('/', async (req: Request, res: Response) => {
     }
 });
 
-//export default router;
+
+router.post('/login', async (req: Request, res: Response) => {
+    try {
+        const { email, password } = req.body;
+        const user = await User.findOne({ email, password });
+        if (!user) {
+            return res.status(404).json({ message: 'Login Failed. Invalid Credentials !' });
+        }
+
+        res.json({ user });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
+
 module.exports = router;

@@ -17,18 +17,36 @@ const User = require('../model/User');
 const url = "mongodb+srv://nyanja-cyane:nyanja@cluster0.qmnp1kf.mongodb.net/<todo_db>?retryWrites=true&w=majority";
 // Set up MongoDB connection before running tests
 beforeAll(() => __awaiter(void 0, void 0, void 0, function* () {
-    //jest.setTimeout(10000);
     yield mongoose_1.default.connect(url);
     console.log('Connected to MongoDb');
-}));
+    yield mongoose_1.default.connection.dropCollection("users");
+}), 25000);
 // Clean up after all tests have finished
 afterAll(() => __awaiter(void 0, void 0, void 0, function* () {
-    yield mongoose_1.default.connection.dropDatabase();
+    yield mongoose_1.default.connection.dropCollection("users");
     yield mongoose_1.default.connection.close();
-}));
+}), 25000);
 describe('User Model', () => {
     let testUserId; // To store the ID of the test todo for use in other tests
-    // Test case for creating a new todo
+    const isValidEmail = (email) => {
+        // Regular expression to validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+    const isStrongPassword = (password) => {
+        // Regular expression to validate password strength
+        // This example requires at least 8 characters, at least one uppercase letter, one lowercase letter, one number, and one special character
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        return passwordRegex.test(password);
+    };
+    it('should validate email and password', () => {
+        // Valid email and strong password
+        expect(isValidEmail('test@example.com')).toBe(true);
+        expect(isStrongPassword('StrongPassword123!')).toBe(true);
+        // Invalid email and weak password
+        expect(isValidEmail('testexample.com')).toBe(false);
+        expect(isStrongPassword('weak')).toBe(false);
+    });
     it('should create a new user', () => __awaiter(void 0, void 0, void 0, function* () {
         const userData = {
             names: 'Test User name',
@@ -46,9 +64,12 @@ describe('User Model', () => {
         const users = yield User.find();
         expect(users).toHaveLength(1); // Assuming one todo was created in the previous test
     }));
-    // Test case for updating a todo
     it('should update an existing user', () => __awaiter(void 0, void 0, void 0, function* () {
-        const updatedUser = yield User.findByIdAndUpdate(testUserId, { names: 'Updated names' }, { email: 'updatedemail@gmail.com' }, { password: 'updatedPassword' }, { new: true });
+        const updatedUser = yield User.findByIdAndUpdate(testUserId, {
+            names: 'Updated names',
+            email: 'updatedemail@gmail.com',
+            password: 'updatedPassword'
+        }, { new: true });
         expect(updatedUser).not.toBeNull();
         expect(updatedUser === null || updatedUser === void 0 ? void 0 : updatedUser.names).toBe('Updated names');
         expect(updatedUser === null || updatedUser === void 0 ? void 0 : updatedUser.email).toBe('updatedemail@gmail.com');
