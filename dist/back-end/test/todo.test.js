@@ -20,14 +20,13 @@ const url = "mongodb+srv://nyanja-cyane:nyanja@cluster0.qmnp1kf.mongodb.net/<tod
 beforeAll(() => __awaiter(void 0, void 0, void 0, function* () {
     yield mongoose_1.default.connect(url);
     console.log('Connected to MongoDb');
-    //jest.setTimeout(50000);
-}));
+    yield mongoose_1.default.connection.dropCollection("todos");
+}), 25000);
 // Clean up after all tests have finished
 afterAll(() => __awaiter(void 0, void 0, void 0, function* () {
-    yield mongoose_1.default.connection.dropDatabase();
+    yield mongoose_1.default.connection.dropCollection("todos");
     yield mongoose_1.default.connection.close();
-    //jest.setTimeout(50000);
-}));
+}), 25000);
 describe('Todo Model', () => {
     let testTodoId; // To store the ID of the test todo for use in other tests
     // Test case for creating a new todo

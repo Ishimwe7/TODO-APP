@@ -9,15 +9,14 @@ const url = "mongodb+srv://nyanja-cyane:nyanja@cluster0.qmnp1kf.mongodb.net/<tod
 beforeAll(async () => {
     await mongoose.connect(url);
     console.log('Connected to MongoDb');
-    //jest.setTimeout(50000);
-});
+    await mongoose.connection.dropCollection("todos");
+}, 25000);
 
 // Clean up after all tests have finished
 afterAll(async () => {
-    await mongoose.connection.dropDatabase();
+    await mongoose.connection.dropCollection("todos");
     await mongoose.connection.close();
-    //jest.setTimeout(50000);
-});
+}, 25000);
 
 describe('Todo Model', () => {
     let testTodoId: string; // To store the ID of the test todo for use in other tests

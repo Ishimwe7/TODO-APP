@@ -7,22 +7,45 @@ const url = "mongodb+srv://nyanja-cyane:nyanja@cluster0.qmnp1kf.mongodb.net/<tod
 
 // Set up MongoDB connection before running tests
 beforeAll(async () => {
-    //jest.setTimeout(10000);
     await mongoose.connect(url);
     console.log('Connected to MongoDb');
-});
+    await mongoose.connection.dropCollection("users");
+}, 25000);
 
 // Clean up after all tests have finished
 afterAll(async () => {
 
-    await mongoose.connection.dropDatabase();
+    await mongoose.connection.dropCollection("users");
     await mongoose.connection.close();
-});
+}, 25000);
 
 describe('User Model', () => {
     let testUserId: string; // To store the ID of the test todo for use in other tests
 
-    // Test case for creating a new todo
+
+    const isValidEmail = (email: string): boolean => {
+        // Regular expression to validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
+    const isStrongPassword = (password: string): boolean => {
+        // Regular expression to validate password strength
+        // This example requires at least 8 characters, at least one uppercase letter, one lowercase letter, one number, and one special character
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        return passwordRegex.test(password);
+    };
+
+    it('should validate email and password', () => {
+        // Valid email and strong password
+        expect(isValidEmail('test@example.com')).toBe(true);
+        expect(isStrongPassword('StrongPassword123!')).toBe(true);
+
+        // Invalid email and weak password
+        expect(isValidEmail('testexample.com')).toBe(false);
+        expect(isStrongPassword('weak')).toBe(false);
+    });
+
     it('should create a new user', async () => {
         const userData = {
             names: 'Test User name',
@@ -44,13 +67,15 @@ describe('User Model', () => {
         expect(users).toHaveLength(1); // Assuming one todo was created in the previous test
     });
 
-    // Test case for updating a todo
+
     it('should update an existing user', async () => {
         const updatedUser = await User.findByIdAndUpdate(
             testUserId,
-            { names: 'Updated names' },
-            { email: 'updatedemail@gmail.com' },
-            { password: 'updatedPassword' },
+            {
+                names: 'Updated names',
+                email: 'updatedemail@gmail.com',
+                password: 'updatedPassword'
+            },
             { new: true }
         );
 
