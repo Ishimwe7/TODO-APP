@@ -1,5 +1,6 @@
 const express = require('express');
-const mongoose = require('mongoose');
+//const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 const controller = require('./back-end/controllers/todoController');
 const userController = require('./back-end/controllers/userController');
 const app = express();

@@ -8,8 +8,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
 const express = require('express');
-const mongoose = require('mongoose');
+//const mongoose = require('mongoose');
+const mongoose_1 = __importDefault(require("mongoose"));
 const controller = require('./back-end/controllers/todoController');
 const userController = require('./back-end/controllers/userController');
 const app = express();
@@ -17,7 +22,7 @@ const url = "mongodb+srv://nyanja-cyane:nyanja@cluster0.qmnp1kf.mongodb.net/<tod
 function connect() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            yield mongoose.connect(url);
+            yield mongoose_1.default.connect(url);
             console.log("Connected to MongoDB");
         }
         catch (error) {
