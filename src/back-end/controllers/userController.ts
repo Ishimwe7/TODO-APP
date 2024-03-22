@@ -2,6 +2,7 @@
 import express, { Request, Response } from 'express';
 const User = require('../model/User');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const router = express.Router();
 
@@ -94,6 +95,10 @@ router.get('/', async (req: Request, res: Response) => {
     }
 });
 
+const generateToken = (email: string) => {
+    const token = jwt.sign({ email }, 'secret', { expiresIn: '1h' });
+    return token;
+};
 
 router.post('/login', async (req: Request, res: Response) => {
     try {
@@ -102,8 +107,10 @@ router.post('/login', async (req: Request, res: Response) => {
         if (!user) {
             return res.status(404).json({ message: 'Login Failed. Invalid Credentials !' });
         }
-
-        res.json({ user });
+        else {
+            generateToken(email);
+        }
+        res.json({ "Login": "Login Success" });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server Error' });

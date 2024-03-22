@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const User = require('../model/User');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const router = express_1.default.Router();
 const isValidEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -105,12 +106,19 @@ router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.status(500).json({ message: 'Server Error' });
     }
 }));
+const generateToken = (email) => {
+    const token = jwt.sign({ email }, 'secret', { expiresIn: '1h' });
+    return token;
+};
 router.post('/login', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { email, password } = req.body;
         const user = yield User.findOne({ email, password });
         if (!user) {
             return res.status(404).json({ message: 'Login Failed. Invalid Credentials !' });
+        }
+        else {
+            generateToken(email);
         }
         res.json({ user });
     }
