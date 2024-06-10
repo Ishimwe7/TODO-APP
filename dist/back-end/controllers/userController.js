@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const User = require('../model/User');
 const bcrypt = require('bcrypt');
+const { requireAuth } = require('../../middlewares/authMiddleware');
 const jwt = require('jsonwebtoken');
 const router = express_1.default.Router();
 const isValidEmail = (email) => {
@@ -39,11 +40,12 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const duplicate = yield User.findOne({ email: email }).exec();
         if (duplicate)
             return res.status(409).json({ "duplicateError": "Email already used!" });
-        const hashedPassword = bcrypt.hash(password, 10);
+        const salt = yield bcrypt.genSalt();
+        const hashedPassword = yield bcrypt.hash(password, salt);
         const user = new User({
             names,
             email,
-            password
+            password: hashedPassword
         });
         yield user.save();
         res.status(201).json(user);
@@ -53,7 +55,7 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.status(500).json({ message: 'Server Error' });
     }
 }));
-router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.put('/:id', requireAuth, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
         const { names, email, password } = req.body;
@@ -74,7 +76,7 @@ router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         res.status(500).json({ message: 'Server Error' });
     }
 }));
-router.delete('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.delete('/:id', requireAuth, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
         const { email, password } = req.body;
@@ -96,9 +98,9 @@ router.delete('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* 
         res.status(500).json({ message: 'Server Error' });
     }
 }));
-router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.get('/', requireAuth, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const users = yield User.find();
+        const users = yield User.find().select('names email');
         res.json(users);
     }
     catch (error) {
@@ -106,21 +108,32 @@ router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.status(500).json({ message: 'Server Error' });
     }
 }));
-const generateToken = (email) => {
-    const token = jwt.sign({ email }, 'secret', { expiresIn: '1h' });
+const age = 24 * 60 * 60;
+const generateToken = (id) => {
+    const token = jwt.sign({ id }, 'nyanja cyane secret', { expiresIn: age });
     return token;
 };
 router.post('/login', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { email, password } = req.body;
-        const user = yield User.findOne({ email, password });
+        const user = yield User.findOne({ email });
         if (!user) {
-            return res.status(404).json({ message: 'Login Failed. Invalid Credentials !' });
+            return res.status(404).json({ message: 'User not found !' });
         }
         else {
-            generateToken(email);
+            const auth = yield bcrypt.compare(password, user.password);
+            if (auth) {
+                const token = generateToken(user._id);
+                // res.cookie('jwt', token, { httpOnly: true, maxAge: age });
+                //const headers = new res.header;
+                res.json({ "User login succes with id ": user._id });
+                res.setHeader('Authorization', `${token}`);
+            }
+            else {
+                return res.status(400).json({ Error: 'Login Failed. Password is incorrect !' });
+            }
         }
-        res.json({ user });
+        //res.json({ "Login": "Login Success" });
     }
     catch (error) {
         console.error(error);
