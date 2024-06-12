@@ -7,16 +7,21 @@ const app = express();
 app.use(cookieParser());
 
 const requireAuth = (req: Request, res: Response, next: NextFunction) => {
-    // const token = req.cookies.jwt;
+    const cookiesToken = req.cookies.jwt;
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
+    const headersToken = authHeader && authHeader.split(' ')[1];
+    const token = cookiesToken || headersToken;
+    console.log('Cookies Token',cookiesToken);
+    console.log('Headers Token', headersToken);
+    console.log('Token', token);
     if (token) {
         jwt.verify(token, "nyanja cyane secret", (err: any, decodedToken: any) => {
             if (err) {
                 res.json({ "Error": "Server error" });
             }
             else {
-                res.json({ "Token": decodedToken });
+                console.log(decodedToken.id);
+                req.body.userId=decodedToken.id;
                 next();
             }
         })

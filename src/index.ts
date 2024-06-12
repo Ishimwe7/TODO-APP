@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 //const mongoose = require('mongoose');
 import mongoose from 'mongoose';
 const controller = require('./back-end/controllers/todoController');
@@ -15,13 +16,20 @@ async function connect() {
         console.error(error);
     }
 }
+app.use(cookieParser());
 
 app.use(express.json());
 
+app.use(cors({
+    origin: 'http://localhost:5173', // Allow your frontend's origin
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true, 
+  }));
+
 app.use('/todos', controller);
 app.use('/users', userController)
-app.use(cookieParser());
+
 connect();
-app.listen(8000, () => {
-    console.log("Server is running on port 8000");
+app.listen(5000, () => {
+    console.log("Server is running on port 5000");
 });

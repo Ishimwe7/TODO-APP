@@ -18,7 +18,7 @@ const isStrongPassword = (password: string): boolean => {
 };
 
 
-router.post('/', async (req: Request, res: Response) => {
+router.post('/register', async (req: Request, res: Response) => {
     try {
         const { names, email, password } = req.body;
         if (!names || !email || !password) return res.status(400).json({ 'message': 'Both names, email and password are required!!' });
@@ -45,7 +45,7 @@ router.post('/', async (req: Request, res: Response) => {
     }
 });
 
-router.put('/:id', requireAuth, async (req: Request, res: Response) => {
+router.put('/editAccount/:id', requireAuth, async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         const { names, email, password } = req.body;
@@ -116,10 +116,10 @@ router.post('/login', async (req: Request, res: Response) => {
             const auth = await bcrypt.compare(password, user.password);
             if (auth) {
                 const token = generateToken(user._id);
-                // res.cookie('jwt', token, { httpOnly: true, maxAge: age });
+                res.cookie('jwt', token, { httpOnly: true, maxAge: age });
                 //const headers = new res.header;
-                res.json({ "User login succes with id ": user._id });
-                res.setHeader('Authorization', `${token}`);
+                res.status(200).json({token});
+                //res.setHeader('Authorization', `${token}`);
             }
             else {
                 return res.status(400).json({ Error: 'Login Failed. Password is incorrect !' });
@@ -131,5 +131,6 @@ router.post('/login', async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Server Error' });
     }
 });
+
 
 module.exports = router;
