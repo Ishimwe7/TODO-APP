@@ -11,9 +11,7 @@ const requireAuth = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers['authorization'];
     const headersToken = authHeader && authHeader.split(' ')[1];
     const token = cookiesToken || headersToken;
-    console.log('Cookies Token',cookiesToken);
-    console.log('Headers Token', headersToken);
-    console.log('Token', token);
+    console.log('Token',token);
     if (token) {
         jwt.verify(token, "nyanja cyane secret", (err: any, decodedToken: any) => {
             if (err) {

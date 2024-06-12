@@ -140,4 +140,18 @@ router.post('/login', (req, res) => __awaiter(void 0, void 0, void 0, function* 
         res.status(500).json({ message: 'Server Error' });
     }
 }));
+router.post('/decodeToken', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const decodedToken = jwt.decode(req.body.token, { complete: true });
+        if (!decodedToken) {
+            return res.status(400).json({ message: 'Invalid token' });
+        }
+        const payload = decodedToken.payload;
+        return res.json(payload);
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+}));
 module.exports = router;
