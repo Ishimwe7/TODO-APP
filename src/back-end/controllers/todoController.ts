@@ -4,11 +4,13 @@ const { requireAuth } = require('../../middlewares/authMiddleware')
 const router = express.Router();
 router.post('/saveTodo', requireAuth, async (req: Request, res: Response) => {
     try {
-        const { title, description } = req.body;
+        const { title, description,userId } = req.body;
         const todo = new Todo({
             title,
             description,
-            completed: false
+            status: 'Pending',
+            userId,
+            updatedAt: Date.now()
         });
         await todo.save();
         return res.status(201).json(todo);
@@ -22,8 +24,9 @@ router.post('/saveTodo', requireAuth, async (req: Request, res: Response) => {
 router.put('/updateTodo/:id', requireAuth, async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const { title, description, completed } = req.body;
-        const todo = await Todo.findByIdAndUpdate(id, { title, description, completed }, { new: true });
+        const updatedAt = Date.now();
+        const { title, description } = req.body;
+        const todo = await Todo.findByIdAndUpdate(id, { title, description,updatedAt }, { new: true });
         if (!todo) {
             return res.status(404).json({ message: 'Todo not found' });
         }
