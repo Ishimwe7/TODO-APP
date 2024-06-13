@@ -51,7 +51,7 @@ router.put('/updateTodo/:id', requireAuth, (req, res) => __awaiter(void 0, void 
         return res.status(500).json({ message: 'Server Error' });
     }
 }));
-router.put('/changeStatus/:id', requireAuth, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.put('/changeStatus/:id/:status', requireAuth, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id, status } = req.params;
         const updatedAt = Date.now();
