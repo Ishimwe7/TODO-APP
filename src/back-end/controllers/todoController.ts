@@ -37,6 +37,21 @@ router.put('/updateTodo/:id', requireAuth, async (req: Request, res: Response) =
     }
 });
 
+router.put('/changeStatus/:id', requireAuth, async (req: Request, res: Response) => {
+    try {
+        const { id,status } = req.params;
+        const updatedAt = Date.now();
+        // const { status } = req.body;
+        const todo = await Todo.findByIdAndUpdate(id, { status, updatedAt}, { new: true });
+        if (!todo) {
+            return res.status(404).json({ message: 'Todo not found' });
+        }
+        return res.json(todo);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Server Error' });
+    }
+});
 // Delete Todo item
 router.delete('/deleteTodo/:id', requireAuth, async (req: Request, res: Response) => {
     try {

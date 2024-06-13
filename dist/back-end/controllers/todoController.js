@@ -51,6 +51,22 @@ router.put('/updateTodo/:id', requireAuth, (req, res) => __awaiter(void 0, void 
         return res.status(500).json({ message: 'Server Error' });
     }
 }));
+router.put('/changeStatus/:id', requireAuth, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { id, status } = req.params;
+        const updatedAt = Date.now();
+        // const { status } = req.body;
+        const todo = yield Todo.findByIdAndUpdate(id, { status, updatedAt }, { new: true });
+        if (!todo) {
+            return res.status(404).json({ message: 'Todo not found' });
+        }
+        return res.json(todo);
+    }
+    catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Server Error' });
+    }
+}));
 // Delete Todo item
 router.delete('/deleteTodo/:id', requireAuth, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
