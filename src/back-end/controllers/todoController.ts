@@ -37,9 +37,9 @@ router.put('/updateTodo/:id', requireAuth, async (req: Request, res: Response) =
     }
 });
 
-router.put('/changeStatus/:id', requireAuth, async (req: Request, res: Response) => {
+router.put('/changeStatus/:id/:status', requireAuth, async (req: Request, res: Response) => {
     try {
-        const { id,status } = req.params;
+        const { id,status} = req.params;
         const updatedAt = Date.now();
         // const { status } = req.body;
         const todo = await Todo.findByIdAndUpdate(id, { status, updatedAt}, { new: true });
