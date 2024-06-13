@@ -26,7 +26,7 @@ const isStrongPassword = (password) => {
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     return passwordRegex.test(password);
 };
-router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.post('/register', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { names, email, password } = req.body;
         if (!names || !email || !password)
@@ -55,7 +55,7 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.status(500).json({ message: 'Server Error' });
     }
 }));
-router.put('/:id', requireAuth, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.put('/editAccount/:id', requireAuth, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
         const { names, email, password } = req.body;
@@ -124,16 +124,30 @@ router.post('/login', (req, res) => __awaiter(void 0, void 0, void 0, function* 
             const auth = yield bcrypt.compare(password, user.password);
             if (auth) {
                 const token = generateToken(user._id);
-                // res.cookie('jwt', token, { httpOnly: true, maxAge: age });
+                res.cookie('jwt', token, { httpOnly: true, maxAge: age });
                 //const headers = new res.header;
-                res.json({ "User login succes with id ": user._id });
-                res.setHeader('Authorization', `${token}`);
+                res.status(200).json({ token });
+                //res.setHeader('Authorization', `${token}`);
             }
             else {
                 return res.status(400).json({ Error: 'Login Failed. Password is incorrect !' });
             }
         }
         //res.json({ "Login": "Login Success" });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+}));
+router.post('/decodeToken', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const decodedToken = jwt.decode(req.body.token, { complete: true });
+        if (!decodedToken) {
+            return res.status(400).json({ message: 'Invalid token' });
+        }
+        const payload = decodedToken.payload;
+        return res.json(payload);
     }
     catch (error) {
         console.error(error);

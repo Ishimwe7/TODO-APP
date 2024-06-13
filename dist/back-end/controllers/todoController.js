@@ -16,62 +16,66 @@ const express_1 = __importDefault(require("express"));
 const Todo = require('../model/Todo');
 const { requireAuth } = require('../../middlewares/authMiddleware');
 const router = express_1.default.Router();
-//const cookieParser = require('cookie-parser');
-// const app = express();
-// app.use(cookieParser());
-// Add Todo item
-router.post('/', requireAuth, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.post('/saveTodo', requireAuth, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { title, description } = req.body;
+        const { title, description, userId } = req.body;
         const todo = new Todo({
             title,
             description,
-            completed: false
+            status: 'Pending',
+            userId,
+            updatedAt: Date.now()
         });
         yield todo.save();
-        res.status(201).json(todo);
+        return res.status(201).json(todo);
     }
     catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Server Error' });
+        return res.status(500).json({ message: 'Server Error' });
     }
 }));
 // Update Todo item
-router.put('/:id', requireAuth, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.put('/updateTodo/:id', requireAuth, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
-        const { title, description, completed } = req.body;
-        const todo = yield Todo.findByIdAndUpdate(id, { title, description, completed }, { new: true });
+        const updatedAt = Date.now();
+        const { title, description } = req.body;
+        const todo = yield Todo.findByIdAndUpdate(id, { title, description, updatedAt }, { new: true });
         if (!todo) {
             return res.status(404).json({ message: 'Todo not found' });
         }
-        res.json(todo);
+        return res.json(todo);
     }
     catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Server Error' });
+        return res.status(500).json({ message: 'Server Error' });
     }
 }));
 // Delete Todo item
-router.delete('/:id', requireAuth, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.delete('/deleteTodo/:id', requireAuth, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
         const todo = yield Todo.findByIdAndDelete(id);
         if (!todo) {
             return res.status(404).json({ message: 'Todo not found' });
         }
-        res.json({ message: 'Todo item deleted successfully' });
+        return res.json({ message: 'Todo item deleted successfully' });
     }
     catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Server Error' });
+        return res.status(500).json({ message: 'Server Error' });
     }
 }));
 // Get all Todo items
-router.get('/', requireAuth, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.get('/getAllTodos', requireAuth, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const todos = yield Todo.find();
-        res.json(todos);
+        if (todos.length > 0) {
+            return res.status(200).json(todos);
+        }
+        else {
+            return res.status(404).json({ message: 'No todos found' });
+        }
     }
     catch (error) {
         console.error(error);

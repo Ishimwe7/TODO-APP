@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express = require('express');
+const cors = require('cors');
 //const mongoose = require('mongoose');
 const mongoose_1 = __importDefault(require("mongoose"));
 const controller = require('./back-end/controllers/todoController');
@@ -31,11 +32,16 @@ function connect() {
         }
     });
 }
+app.use(cookieParser());
 app.use(express.json());
+app.use(cors({
+    origin: 'http://localhost:5173', // Allow your frontend's origin
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+}));
 app.use('/todos', controller);
 app.use('/users', userController);
-app.use(cookieParser());
 connect();
-app.listen(8000, () => {
-    console.log("Server is running on port 8000");
+app.listen(5000, () => {
+    console.log("Server is running on port 5000");
 });
