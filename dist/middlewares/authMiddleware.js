@@ -13,14 +13,14 @@ const requireAuth = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const headersToken = authHeader && authHeader.split(' ')[1];
     const token = cookiesToken || headersToken;
-    console.log('Token', token);
+    // console.log('Token',token);
     if (token) {
         jwt.verify(token, "nyanja cyane secret", (err, decodedToken) => {
             if (err) {
                 res.json({ "Error": "Server error" });
             }
             else {
-                console.log(decodedToken.id);
+                //console.log(decodedToken.id);
                 req.body.userId = decodedToken.id;
                 next();
             }
