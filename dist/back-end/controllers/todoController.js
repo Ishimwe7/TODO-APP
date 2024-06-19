@@ -85,7 +85,11 @@ router.delete('/deleteTodo/:id', requireAuth, (req, res) => __awaiter(void 0, vo
 // Get all Todo items
 router.get('/getAllTodos', requireAuth, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const todos = yield Todo.find();
+        const userId = req.body.userId;
+        if (!userId) {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
+        const todos = yield Todo.find({ userId }).sort({ updatedAt: -1 });
         if (todos.length > 0) {
             return res.status(200).json(todos);
         }
