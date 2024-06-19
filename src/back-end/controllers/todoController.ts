@@ -70,7 +70,11 @@ router.delete('/deleteTodo/:id', requireAuth, async (req: Request, res: Response
 // Get all Todo items
 router.get('/getAllTodos', requireAuth, async (req: Request, res: Response) => {
     try {
-        const todos = await Todo.find();
+        const userId = req.body.userId; 
+         if (!userId) {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
+        const todos = await Todo.find({ userId }).sort({ updatedAt: -1 });
         if (todos.length > 0) { 
             return res.status(200).json(todos);
         } else {
